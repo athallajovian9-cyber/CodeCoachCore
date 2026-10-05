@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CodeCoach 2.0 - Node.js & TypeScript Powered</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #0B0E14; color: #F8FAFC; height: 100vh; display: flex; flex-direction: column; }
+    header { background: #121620; border-bottom: 1px solid #1E293B; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .brand { font-size: 1.25rem; font-weight: 700; color: #38BDF8; display: flex; align-items: center; gap: 8px; }
+    .badge-discord { background: #22C55E; color: #000; text-decoration: none; padding: 6px 14px; border-radius: 6px; font-weight: bold; font-size: 0.85rem; }
+    .controls { display: flex; gap: 12px; align-items: center; }
+    select { background: #1E293B; color: #FFF; border: 1px solid #334155; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem; outline: none; }
+    .btn-run { background: #38BDF8; color: #0B0E14; border: none; padding: 8px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    .btn-run:hover { opacity: 0.9; }
+    main { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; }
+    .panel { background: #121620; border: 1px solid #1E293B; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
+    .panel-header { background: #161C28; padding: 10px 16px; font-size: 0.85rem; font-weight: bold; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #1E293B; }
+    textarea { flex: 1; background: #0A0D13; color: #F1F5F9; border: none; padding: 16px; font-family: "Consolas", monospace; font-size: 0.95rem; resize: none; outline: none; line-height: 1.5; }
+    .report-box { flex: 1; background: #0A0D13; color: #38BDF8; padding: 16px; font-family: "Consolas", monospace; font-size: 0.95rem; white-space: pre-wrap; overflow-y: auto; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">🚀 CodeCoach 2.0 (Node.js & TS)</div>
+    <div class="controls">
+      <select id="langSelect">
+        <option value="python">Python</option>
+        <option value="typescript">TypeScript</option>
+        <option value="javascript">JavaScript</option>
+        <option value="luau">Luau (Roblox)</option>
+        <option value="html">HTML</option>
+      </select>
+      <button class="btn-run" onclick="coachCode()">🔍 Coach My Code</button>
+      <a href="https://discord.gg/QtyBucygQ6" target="_blank" class="badge-discord">💎 Discord First 100 Badge</a>
+    </div>
+  </header>
+  <main>
+    <div class="panel">
+      <div class="panel-header">📝 Code Input</div>
+      <textarea id="codeInput" placeholder="Paste your code here..."></textarea>
+    </div>
+    <div class="panel">
+      <div class="panel-header">💡 Coach Analysis & Tips</div>
+      <div id="reportBox" class="report-box">Ready to coach your code! Click "Coach My Code" above.</div>
+    </div>
+  </main>
+  <script>
+    const SAMPLES = {
+      python: "score = 10\nif score = 20:\n    print 'Winner'\nwhile True:\n    score += 1",
+      typescript: "var playerName = 'Alex';\nlet data: any = 'untyped';\nfunction add(a, b) {\n    return a + b;\n}",
+      javascript: "var count = 5;\nif (count = 10) {\n    console.log 'Hello';\n}\nwhile(true) {\n    count++;\n}",
+      luau: "while true do\n    print('Looping with no wait!')\nend",
+      html: "<center>\n  <h1>My Cool Game</h1>\n  <img src='hero.png'>\n</center>"
+    };
+
+    const langSelect = document.getElementById("langSelect");
+    const codeInput = document.getElementById("codeInput");
+    const reportBox = document.getElementById("reportBox");
+
+    langSelect.addEventListener("change", () => {
+      codeInput.value = SAMPLES[langSelect.value] || "";
+      coachCode();
+    });
+
+    codeInput.value = SAMPLES.python;
+
+    async function coachCode() {
+      const lang = langSelect.value;
+      const code = codeInput.value;
+      try {
+        const res = await fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lang, code })
+        });
+        const data = await res.json();
+        reportBox.textContent = data.report;
+      } catch (err) {
+        reportBox.textContent = "Error connecting to CodeCoach backend server.";
+      }
+    }
+
+    // Auto-run on load
+    coachCode();
+  </script>
+</body>
+</html>
